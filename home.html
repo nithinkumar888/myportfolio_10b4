@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Smart Home Automation System</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { font-family: Arial, sans-serif; background: #f5f5f5; padding: 20px; }
+    h1 { text-align: center; }
+    .module { border: 1px solid #ccc; background: #fff; padding: 20px; margin-bottom: 20px; border-radius: 8px; }
+    .module h2 { margin-top: 0; }
+    .controls button { margin-right: 10px; margin-bottom: 10px; }
+    .status { margin-top: 10px; font-weight: bold; }
+  </style>
+</head>
+<body>
+
+<h1>Smart Home Automation System</h1>
+
+<!-- Lighting Module -->
+<div class="module" id="lighting-module">
+  <h2>Lighting Control</h2>
+  <div class="controls">
+    <button onclick="LightingModule.turnOn()">Turn On</button>
+    <button onclick="LightingModule.turnOff()">Turn Off</button>
+  </div>
+  <div class="status" id="lighting-status">Status: OFF</div>
+</div>
+
+<!-- Cooling Module -->
+<div class="module" id="cooling-module">
+  <h2>Cooling Control (Fan / AC)</h2>
+  <div class="controls">
+    <button onclick="CoolingModule.setFan(true)">Fan On</button>
+    <button onclick="CoolingModule.setFan(false)">Fan Off</button>
+    <button onclick="CoolingModule.setAC(true)">AC On</button>
+    <button onclick="CoolingModule.setAC(false)">AC Off</button>
+  </div>
+  <div class="status" id="cooling-status">Fan: OFF | AC: OFF</div>
+</div>
+
+<!-- Security Module -->
+<div class="module" id="security-module">
+  <h2>Security Camera</h2>
+  <div class="controls">
+    <button onclick="SecurityModule.startCamera()">Start Camera</button>
+    <button onclick="SecurityModule.stopCamera()">Stop Camera</button>
+  </div>
+  <div class="status" id="security-status">Camera: OFF</div>
+</div>
+
+<!-- Simulated Voice Command -->
+<div class="module">
+  <h2>Voice Command Simulation</h2>
+  <input type="text" id="voice-input" placeholder="e.g., turn on lights" />
+  <button onclick="VoiceModule.processCommand()">Submit</button>
+</div>
+
+<script>
+  // Lighting Module - High cohesion: only manages lighting
+  const LightingModule = (function() {
+    let isOn = false;
+
+    function updateStatus() {
+      document.getElementById('lighting-status').textContent = `Status: ${isOn ? 'ON' : 'OFF'}`;
+    }
+
+    return {
+      turnOn: function() {
+        isOn = true;
+        updateStatus();
+      },
+      turnOff: function() {
+        isOn = false;
+        updateStatus();
+      },
+      getStatus: function() {
+        return isOn ? 'ON' : 'OFF';
+      }
+    };
+  })();
+
+  // Cooling Module - manages both Fan and AC
+  const CoolingModule = (function() {
+    let fanOn = false;
+    let acOn = false;
+
+    function updateStatus() {
+      document.getElementById('cooling-status').textContent = `Fan: ${fanOn ? 'ON' : 'OFF'} | AC: ${acOn ? 'ON' : 'OFF'}`;
+    }
+
+    return {
+      setFan: function(state) {
+        fanOn = state;
+        updateStatus();
+      },
+      setAC: function(state) {
+        acOn = state;
+        updateStatus();
+      },
+      getStatus: function() {
+        return { fan: fanOn, ac: acOn };
+      }
+    };
+  })();
+
+  // Security Module - Manages camera
+  const SecurityModule = (function() {
+    let cameraOn = false;
+
+    function updateStatus() {
+      document.getElementById('security-status').textContent = `Camera: ${cameraOn ? 'ON' : 'OFF'}`;
+    }
+
+    return {
+      startCamera: function() {
+        cameraOn = true;
+        updateStatus();
+      },
+      stopCamera: function() {
+        cameraOn = false;
+        updateStatus();
+      },
+      getStatus: function() {
+        return cameraOn ? 'ON' : 'OFF';
+      }
+    };
+  })();
+
+  // Voice Module - Interacts with other modules via defined interfaces
+  const VoiceModule = (function() {
+    const commandMap = {
+      'turn on lights': () => LightingModule.turnOn(),
+      'turn off lights': () => LightingModule.turnOff(),
+      'fan on': () => CoolingModule.setFan(true),
+      'fan off': () => CoolingModule.setFan(false),
+      'ac on': () => CoolingModule.setAC(true),
+      'ac off': () => CoolingModule.setAC(false),
+      'start camera': () => SecurityModule.startCamera(),
+      'stop camera': () => SecurityModule.stopCamera()
+    };
+
+    return {
+      processCommand: function() {
+        const input = document.getElementById('voice-input').value.trim().toLowerCase();
+        if (commandMap[input]) {
+          commandMap[input]();
+        } else {
+          alert('Command not recognized');
+        }
+      }
+    };
+  })();
+</script>
+
+</body>
+</html>
